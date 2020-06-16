@@ -184,29 +184,36 @@ static int selected_boot_partition(const bootloader_state_t *bs)
         }
 #endif
         // UF2 modification to detect if GPIO0 is pressed during this time to load uf2 "bootloader" app
-        if ( boot_index != FACTORY_INDEX )
+        if (boot_index != FACTORY_INDEX )
         {
           board_led_on();
 
-          uint32_t num_pin = 0;
-          gpio_pad_select_gpio(num_pin);
-          if (GPIO_PIN_MUX_REG[num_pin]) {
-            PIN_INPUT_ENABLE(GPIO_PIN_MUX_REG[num_pin]);
-          }
-          gpio_pad_pullup(num_pin);
-
-          uint32_t tm_start = esp_log_early_timestamp();
-          while (500 > (esp_log_early_timestamp() - tm_start) )
-          {
-            if ( GPIO_INPUT_GET(num_pin) == 0 )
-            {
-              ESP_LOGI(TAG, "Detect a condition of the UF2 Bootloader");
-
-              // Simply return factory index without erasing any other partition
+          PIN_INPUT_ENABLE(GPIO_PIN_MUX_REG[16]);
+          if (GPIO_INPUT_GET(16) == 1) {
               boot_index = FACTORY_INDEX;
-              break;
+          } else {
+            GPIO_OUTPUT_SET(16, 1);
+          }
+          if (boot_index != FACTORY_INDEX ) {
+            uint32_t num_pin = 0;
+            gpio_pad_select_gpio(num_pin);
+            if (GPIO_PIN_MUX_REG[num_pin]) {
+              PIN_INPUT_ENABLE(GPIO_PIN_MUX_REG[num_pin]);
+            }
+            gpio_pad_pullup(num_pin);
+
+            uint32_t tm_start = esp_log_early_timestamp();
+            while (500 > (esp_log_early_timestamp() - tm_start) )
+            {
+              if ( GPIO_INPUT_GET(num_pin) == 0 )
+              {
+                // Simply return factory index without erasing any other partition
+                boot_index = FACTORY_INDEX;
+                break;
+              }
             }
           }
+          GPIO_OUTPUT_SET(16, 0);
 
           board_led_off();
         }
