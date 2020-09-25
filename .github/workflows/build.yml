@@ -1,6 +1,6 @@
 name: Build
 
-on: [pull_request, push, repository_dispatch]
+on: [pull_request, push, repository_dispatch, release]
 
 jobs:
   build:
@@ -10,6 +10,10 @@ jobs:
       matrix:
         board: ['espressif_kaluga_1', 'espressif_saola_1_wroom', 'espressif_saola_1_wrover', 'microdev_micro_s2', 'unexpectedmaker_feathers2']
     steps:
+    - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
     - name: Setup Python
       uses: actions/setup-python@v1
 
@@ -25,4 +29,4 @@ jobs:
       run: docker run --rm -v $PWD:/project -w /project espressif/idf:latest idf.py build -DBOARD=${{ matrix.board }}
 
     - name: List files
-      run: ls -a
+      run: ls build/uf2-esp32s.bin && ls build
