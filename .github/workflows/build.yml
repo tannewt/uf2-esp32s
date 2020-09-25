@@ -35,7 +35,7 @@ jobs:
 
     - name: Rename release artifact
       run: cp build/uf2-esp32s.bin uf2-${{ matrix.board }}-${{ github.event.release.tag_name }}.bin
-      if: ${{ github.event_name == "release" }}
+      if: ${{ github.event_name == 'release' }}
 
     - name: Rename artifact
       run: cp build/uf2-esp32s.bin uf2-${{ matrix.board }}-$(git describe --always).bin
@@ -53,4 +53,4 @@ jobs:
         asset_path: ./uf2-${{ matrix.board }}-${{ github.event.release.tag_name }}.bin
         asset_name: uf2-${{ matrix.board }}-${{ github.event.release.tag_name }}.bin
         asset_content_type: application/octet-stream
-      if: ${{ github.event_name == "release" }}
+      if: ${{ github.event_name == 'release' }}
